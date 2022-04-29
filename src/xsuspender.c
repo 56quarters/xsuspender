@@ -141,10 +141,14 @@ xsus_window_suspend (WnckWindow *window)
         return;
 
     // We shouldn't be having an entry for this window in the queues already ...
-#ifndef NDEBUG
-    g_assert (! xsus_entry_find_for_window_rule (window, rule, suspended_entries));
-    g_assert (! xsus_entry_find_for_window_rule (window, rule, queued_entries));
-#endif
+    if (xsus_entry_find_for_window_rule(window, rule, suspended_entries) || xsus_entry_find_for_window_rule(window, rule, queued_entries)) {
+        g_warning("Unexpected queued or suspended window during suspend: %#lx (%d): %s",
+                 wnck_window_get_xid (window),
+                 wnck_window_get_pid (window),
+                 wnck_window_get_name (window));
+
+            return;
+    }
 
     // Schedule window suspension
     g_debug ("Suspending window in %ds: %#lx (%d): %s",
