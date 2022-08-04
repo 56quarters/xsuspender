@@ -180,15 +180,30 @@ iterate_windows_kill_matching ()
             continue;
 
         // Skip currently focused window
-        if (wnck_window_is_active (window))
+        if (wnck_window_is_active (window)) {
+            g_debug("skipping currently active window during AC event suspend: %#lx (%d): %s",
+                      wnck_window_get_xid (window),
+                      wnck_window_get_pid (window),
+                      wnck_window_get_name (window));
             continue;
+        } else {
+            g_debug("attempting to suspend non-active window during AC event suspend: %#lx (%d): %s",
+                      wnck_window_get_xid (window),
+                      wnck_window_get_pid (window),
+                      wnck_window_get_name (window));
+        }
 
         // On battery, auto-suspend windows that allow it
         if (is_battery_powered && rule->auto_on_battery) {
             // Do nothing if we're already keeping track of this window
             if (xsus_entry_find_for_window_rule (window, rule, queued_entries) ||
-                xsus_entry_find_for_window_rule (window, rule, suspended_entries))
+                xsus_entry_find_for_window_rule (window, rule, suspended_entries)) {
+                g_debug("skipping already queued or suspended window during AC event suspend: %#lx (%d): %s",
+                        wnck_window_get_xid (window),
+                        wnck_window_get_pid (window),
+                        wnck_window_get_name (window));
                 continue;
+            }
 
             // Otherwise, schedule the window for suspension shortly
             WindowEntry *entry = xsus_window_entry_new (window, rule);
