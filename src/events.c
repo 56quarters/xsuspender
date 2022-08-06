@@ -168,9 +168,25 @@ main_window_get_rule (WnckWindow *window)
 
 
 static
+WnckWindow*
+get_active_window()
+{
+    for (GList *w = wnck_screen_get_windows (wnck_screen_get_default ()); w ; w = w->next) {
+        WnckWindow *window = w->data;
+
+        if (wnck_window_is_active (window))
+            return window;
+    }
+
+    return NULL;
+}
+
+static
 void
 iterate_windows_kill_matching ()
 {
+    WnckWindow *active = get_active_window();
+
     for (GList *w = wnck_screen_get_windows (wnck_screen_get_default ()); w ; w = w->next) {
         WnckWindow *window = w->data;
         Rule *rule = main_window_get_rule (window);
@@ -180,7 +196,7 @@ iterate_windows_kill_matching ()
             continue;
 
         // Skip currently focused window
-        if (wnck_window_is_active (window)) {
+        if (active != NULL && windows_are_same_process (window, active)) {
             g_debug("skipping currently active window during AC event suspend: %#lx (%d): %s",
                       wnck_window_get_xid (window),
                       wnck_window_get_pid (window),
