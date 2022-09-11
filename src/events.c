@@ -168,24 +168,10 @@ main_window_get_rule (WnckWindow *window)
 
 
 static
-WnckWindow*
-get_active_window()
-{
-    for (GList *w = wnck_screen_get_windows (wnck_screen_get_default ()); w ; w = w->next) {
-        WnckWindow *window = w->data;
-
-        if (wnck_window_is_active (window))
-            return window;
-    }
-
-    return NULL;
-}
-
-static
 void
 iterate_windows_kill_matching ()
 {
-    WnckWindow *active = get_active_window();
+    WnckWindow *active = wnck_screen_get_active_window (wnck_screen_get_default ());
 
     for (GList *w = wnck_screen_get_windows (wnck_screen_get_default ()); w ; w = w->next) {
         WnckWindow *window = w->data;
